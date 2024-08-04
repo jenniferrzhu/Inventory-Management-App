@@ -43,10 +43,10 @@ export default function Home() {
 
   // Search for an item in the inventory
   const searchInventory = async (item) => {
-    try {
+    try { 
       const docRef = doc(collection(firestore, 'pantry'), item);
       const docSnap = await getDoc(docRef);
-
+      
       if (docSnap.exists()) {
         return docSnap.data();
       } else {
@@ -80,6 +80,11 @@ export default function Home() {
       setError('Error searching inventory.');
     }
   };
+
+  const handleFocus = () => { 
+    setSearchTerm('');
+  };
+
 
   // Remove an item from the inventory
   const removeItem = async (item) => {
@@ -147,7 +152,7 @@ export default function Home() {
       backgroundColor: '#863a14',
       color: '#ffffff',
     },
-  }));
+  })); 
 
   return ( 
     <StyledEngineProvider injectFirst>
@@ -243,53 +248,50 @@ export default function Home() {
               </ThemeProvider>
             </Box>
 
-            <Box width="100%" display="flex" flexDirection="column" alignItems="center" marginTop="50px" px={2}>
+            <Box width="100%" display="flex" flexDirection="column" alignItems="center" px={2}>
                 <Typography variant='h2' fontWeight={400} mb={2}>
                   Pantry Items
                 </Typography> 
                 <Stack spacing={2} width="100%" maxWidth="600px" mb={2}>
-                <TextField
+                <TextField  
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#552910', // Default border color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#863a14', // Border color on hover
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#863a14', // Border color when focused
+                      },
+                    },
+                  }}
                   variant="outlined"
                   placeholder="Search"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyPress={(e) => {
+                  onChange={(e) => setSearchTerm(e.target.value.charAt(0).toUpperCase() + e.target.value.substring(1))}
+                  onKeyPress={(e) => { 
                     if (e.key === 'Enter') handleSearch();
                   }}
+                  onFocus={handleFocus}
                   fullWidth
-                />
-                <Button
-                  variant="contained"
-                  sx={{ bgcolor: 'color.dark', alignSelf: 'flex-end' }}
-                  onClick={handleSearch}
-                >
-                  Search
-                </Button>
+                /> 
               </Stack>
               {error && <Typography color="error">{error}</Typography>}
-              {searchResult && (
-                <Box
-                  width="100%"
-                  maxWidth="600px"
-                  p={2}
-                  borderRadius="10px"
-                  bgcolor="white"
-                  boxShadow={1}
-                  mb={2}
-                >
-                  <Typography variant="h5">
-                    {searchTerm}
-                  </Typography>
-                  <Typography variant="h6">Quantity: {searchResult?.quantity || 0}</Typography>
-                </Box>
+              {searchTerm && searchResult &&(
+                <Typography variant="h5">
+                  {searchTerm}: {searchResult?.quantity ?? 'N/A'}
+                </Typography> 
               )}
                 <Box
                   width="100%"
                   maxWidth="600px"
-                  maxHeight="50vh"  
+                  maxHeight="40vh"  
                   overflow="auto" 
                   borderRadius="10px" 
                   p={2}
+                  marginTop="-20px"
                 >
                   <Stack spacing={2}>
                     {inventory.map(({ name, quantity }) => (
