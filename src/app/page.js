@@ -109,7 +109,7 @@ export default function Home() {
   // Add an item to the inventory
   const addItem = async (item) => {
     try {
-      const docRef = doc(collection(firestore, 'pantry'), item);
+      const docRef = doc(collection(firestore, 'pantry'), item.charAt(0).toUpperCase() + item.slice(1));
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
