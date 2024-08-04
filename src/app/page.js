@@ -254,7 +254,7 @@ export default function Home() {
                 </Typography> 
                 <Stack spacing={2} width="100%" maxWidth="600px" mb={2}>
                 <TextField  
-                  sx={{
+                  sx={{ 
                     '& .MuiOutlinedInput-root': {
                       '& fieldset': {
                         borderColor: '#552910', // Default border color
