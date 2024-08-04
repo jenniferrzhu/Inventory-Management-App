@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Box, Stack, Typography, Button, Modal, TextField } from '@mui/material'
+import { Box, Stack, Typography, Button, Modal, TextField } from '@mui/material' 
+import { createTheme, ThemeProvider, styled } from '@mui/material/styles'
 import { firestore } from '@/firebase'
 import {
   collection,
@@ -16,7 +17,7 @@ import { StyledEngineProvider } from '@mui/material/styles';
 
 export default function Home() {
   const [inventory, setInventory] = useState([])
-  const [open, setOpen] = useState([])
+  const [open, setOpen] = useState(false)
   const [itemName, setItemName] = useState('')
 
   const updateInventory = async () => {
@@ -69,7 +70,26 @@ export default function Home() {
   }, [])
 
   const handleOpen = () => setOpen(true)
-  const handleClose = () => setOpen(false)
+  const handleClose = () => setOpen(false) 
+
+  const theme = createTheme({
+    palette: {
+      color: {
+        background: '#e0a15a',
+        dark: '#552910',
+        redBrown: '#863a14',
+        medium: '#9b5f39',
+        white: 'ffffff'
+      },
+    },
+  });
+
+  const StyledButton = styled(Button)(({ theme, color = 'primary' }) => ({
+    ':hover': { 
+      backgroundColor: '#863a14',
+      color: '#ffffff'
+    },
+  }));
 
   return ( 
     <StyledEngineProvider injectFirst>
@@ -97,98 +117,122 @@ export default function Home() {
             opacity: 0.75
           }}
         />
+        <Box bgcolor="#e0a15a" maxWidth="75%" maxHeight="75%" display={'flex'} flexDirection="column" justifyContent={'center'} alignItems={'center'} position="relative" top="50%" left="50%" borderRadius="10%" sx={{
+          transform: "translate(-50%, -50%)", opacity: 0.95, zIndex: 0
+        }}> 
         
-        {/* Overlay Content */}
-        <Box
-          width="100vw"
-          height="100vh"
-          display={'flex'}
-          flexDirection={'column'}
-          justifyContent={'center'}
-          alignItems={'center'}
-          gap={2}
-          sx={{ position: 'relative', zIndex: 1 }}  
-        >
-          <Modal open={open} onClose={handleClose}>
-            <Box 
-              position="absolute"
-              top="50%"
-              left="50%"
-              width={400}
-              bgcolor="white"
-              border="2px solid #000"
-              boxShadow={24}
-              p={4}
-              display={"flex"}
-              flexDirection='column'
-              gap={3}
-              sx={{
-                transform: "translate(-50%, -50%)"
-              }}
-            >
-              <Typography variant="h6">Add Item</Typography>
-              <Stack width="100%" direction="row" spacing={2}>
-                <TextField 
-                  variant='outlined'
-                  fullWidth
-                  value={itemName}
-                  onChange={(e) => {
-                    setItemName(e.target.value);
-                  }}
-                />
-                <Button 
-                  variant="outlined" 
-                  onClick={() => {
-                    addItem(itemName);
-                    setItemName('');
-                    handleClose();
-                  }}
-                >
-                  Add
-                </Button>
-              </Stack>
-            </Box>
-          </Modal>
-          <Button variant="contained" sx={{ width: '3rem', height: '3rem', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '50%' }} onClick={handleOpen}>
-            +
-          </Button>
-          <Box border="1px solid #333">
-            <Box width="800px" height="100px" bgcolor="#ADD8E6" display="flex" alignItems="center" justifyContent="center">
-              <Typography variant='h2' color="#333">
-                Inventory Items
-              </Typography>
-            </Box>
-            <Box width="800px" maxHeight="300px" overflow="auto"> 
-            <Stack spacing={2}>
-              {inventory.map(({ name, quantity }) => (
-                <Box key={name} width="100%" minHeight="150px" display="flex"
-                  alignItems={'center'} justifyContent={'space-between'} bgColor="f0f0f0" padding={5}
-                >
-                  <Typography variant="h3" color="#333" textAlign={'center'}>
-                    {name.charAt(0).toUpperCase() + name.slice(1)}
-                  </Typography>
-                  <Typography variant="h3" color="#333" textAlign={'center'}>
-                    {quantity}
-                  </Typography>
-                  <Stack direction="row" spacing={2}>
-                    <Button variant="contained" onClick={() => {
-                      addItem(name);
+          {/* Overlay Content */}
+          <Box
+            width="100%"
+            height="100%"
+            display={'flex'}
+            flexDirection={'column'}
+            justifyContent={'center'}
+            alignItems={'center'}
+            gap={2}
+            sx={{ position: 'relative', zIndex: 1 }}  
+          >
+            <Modal open={open} onClose={handleClose}>
+              <Box 
+                position="absolute"
+                top="50%"
+                left="50%"
+                width={400}
+                bgcolor="white"
+                border="2px solid #000"
+                boxShadow={24}
+                p={4}
+                display={"flex"}
+                flexDirection='column'
+                gap={3}
+                sx={{
+                  transform: "translate(-50%, -50%)",
+                  borderRadius: "5%"
+                }}
+              >
+                <Typography variant="h6">Add Item</Typography>
+                <Stack width="100%" direction="row" spacing={2}>
+                  <TextField 
+                    variant='outlined'
+                    fullWidth
+                    value={itemName}
+                    onChange={(e) => {
+                      setItemName(e.target.value);
+                    }}
+                  /> 
+                  <ThemeProvider theme={theme}> 
+                    <StyledButton sx={{ bgcolor: 'color.dark', }} variant="contained" onClick={() => {
+                      addItem(itemName);
+                      setItemName('');
+                      handleClose();
                     }}>
                       Add
-                    </Button>
-                    <Button variant="contained" onClick={() => {
-                      removeItem(name);
-                    }}>
-                      Remove
-                    </Button>
+                    </StyledButton>
+                  </ThemeProvider>
+                </Stack>
+              </Box>
+            </Modal>
+            <Box sx={{
+              position: 'relative',  
+              zIndex: 2  
+            }}>
+              <ThemeProvider theme={theme}> 
+                <StyledButton variant="contained" sx={{ bgcolor: 'color.dark', width: '3rem', height: '3rem', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10%', position: 'fixed', top: '2rem', right: '3rem', zIndex: 10}} onClick={handleOpen}
+                  border="none"
+                > 
+                  +
+                </StyledButton>
+              </ThemeProvider>
+            </Box>
+
+            <Box width="100%" display="flex" flexDirection="column" alignItems="center" marginTop="50px" px={2}>
+                <Typography variant='h2' fontWeight={400} mb={2}>
+                  Pantry Items
+                </Typography>
+                
+                <Box
+                  width="100%"
+                  maxWidth="600px"
+                  maxHeight="50vh"  
+                  overflow="auto" 
+                  borderRadius="10px" 
+                  p={2}
+                >
+                  <Stack spacing={2}>
+                    {inventory.map(({ name, quantity }) => (
+                      <Box key={name} width="100%" minHeight="120px" display="flex"
+                        alignItems={'center'} justifyContent={'space-between'} padding={2} borderRadius="8px"
+                      >
+                        <Typography variant="h3" textAlign={'center'}>
+                          {name.charAt(0).toUpperCase() + name.slice(1)}
+                        </Typography> 
+                        <Stack direction="row" spacing={2}>
+                        <ThemeProvider theme={theme}> 
+                          <StyledButton sx={{ bgcolor: 'color.dark', }} variant="contained" onClick={() => {
+                            addItem(name);
+                          }}>
+                            +
+                          </StyledButton>
+                        </ThemeProvider>
+                          <Typography variant="h3" textAlign={'center'}>
+                          {quantity}
+                          </Typography>
+                        <ThemeProvider theme={theme}> 
+                          <StyledButton sx={{ bgcolor: 'color.dark', }} variant="contained" onClick={() => {
+                            removeItem(name);
+                          }}>
+                            —
+                          </StyledButton>
+                        </ThemeProvider> 
+                        </Stack>
+                      </Box>
+                    ))}
                   </Stack>
                 </Box>
-              ))}
-            </Stack>
             </Box>
           </Box>
         </Box>
-      </Box>
+      </Box> 
     </StyledEngineProvider>
   )
 }
