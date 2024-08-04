@@ -167,17 +167,19 @@ export default function Home() {
         {/* Background Image Box */}
         <Box
           sx={{
-            position: 'absolute',
+            position: 'absolute', 
             top: 0,
             left: 0,
-            height: '100%',
-            width: '100%',
+            height: '100vh',
+            width: '100vw',
             backgroundImage: "url('https://png.pngtree.com/thumb_back/fh260/background/20230613/pngtree-an-illustration-of-a-pantry-with-pots-and-dishes-image_2891465.jpg')",
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             zIndex: -1,  
-            opacity: 0.75
+            opacity: 0.75,
+            margin: 0,
+            padding: 0
           }}
         />
         <Box bgcolor="#e0a15a" maxWidth="75%" maxHeight="75%" display={'flex'} flexDirection="column" justifyContent={'center'} alignItems={'center'} position="relative" top="50%" left="50%" borderRadius="10%" sx={{
@@ -304,9 +306,9 @@ export default function Home() {
                         <Stack direction="row" spacing={2}>
                         <ThemeProvider theme={theme}> 
                           <StyledButton sx={{ bgcolor: 'color.dark', }} variant="contained" onClick={() => {
-                            addItem(name);
+                            removeItem(name);
                           }}>
-                            +
+                            —
                           </StyledButton>
                         </ThemeProvider>
                           <Typography variant="h3" textAlign={'center'}>
@@ -314,9 +316,9 @@ export default function Home() {
                           </Typography>
                         <ThemeProvider theme={theme}> 
                           <StyledButton sx={{ bgcolor: 'color.dark', }} variant="contained" onClick={() => {
-                            removeItem(name);
+                            addItem(name);
                           }}>
-                            —
+                            +
                           </StyledButton>
                         </ThemeProvider> 
                         </Stack>
