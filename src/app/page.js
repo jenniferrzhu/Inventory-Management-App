@@ -250,7 +250,7 @@ export default function Home() {
 
             <Box width="100%" display="flex" flexDirection="column" alignItems="center" px={2}>
                 <Typography variant='h2' fontWeight={400} mb={2}>
-                  Pantry Items
+                  Inventory
                 </Typography> 
                 <Stack spacing={2} width="100%" maxWidth="600px" mb={2}>
                 <TextField  
