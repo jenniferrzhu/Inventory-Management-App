@@ -11,15 +11,20 @@
   "dependencies": {
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
+    "@eslint/config-array": "^0.17.1",
+    "@eslint/object-schema": "^2.1.4",
     "@mui/material": "^5.16.6",
-    "firebase": "^9.23.0",
+    "firebase": "^10.12.5",
+    "glob": "^11.0.0",
+    "lru-cache": "^11.0.0",
     "next": "14.2.5",
     "react": "^18",
     "react-dom": "^18",
-    "reactfire": "^4.2.3"
+    "reactfire": "^4.2.3",
+    "rimraf": "^6.0.1"
   },
   "devDependencies": {
-    "eslint": "^8",
+    "eslint": "^9.8.0",
     "eslint-config-next": "14.2.5"
   }
 }
