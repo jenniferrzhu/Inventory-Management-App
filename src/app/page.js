@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Box, Stack, Typography, Button, Modal, TextField } from '@mui/material' 
-import { createTheme, ThemeProvider, styled } from '@mui/material/styles'
+import { Box, Stack, Typography, Button, Modal, TextField, Toolbar } from '@mui/material' 
+import { createTheme, ThemeProvider, styled } from '@mui/material/styles' 
 import { firestore } from '@/firebase'
 import {
   collection,
@@ -19,59 +19,116 @@ export default function Home() {
   const [inventory, setInventory] = useState([])
   const [open, setOpen] = useState(false)
   const [itemName, setItemName] = useState('')
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResult, setSearchResult] = useState(null);
+  const [error, setError] = useState('');
 
+  // Update inventory from Firestore
   const updateInventory = async () => {
-    const snapshot = query(collection(firestore, 'pantry'))
-    const docs = await getDocs(snapshot)
-    const inventoryList = []
-    docs.forEach((doc) => {
-      inventoryList.push({
-        name: doc.id,
-        ...doc.data(),
-      })
-    })
-    setInventory(inventoryList)
-  }
+    try {
+      const snapshot = query(collection(firestore, 'pantry'));
+      const docs = await getDocs(snapshot);
+      const inventoryList = [];
+      docs.forEach((doc) => {
+        inventoryList.push({
+          name: doc.id,
+          ...doc.data(),
+        });
+      });
+      setInventory(inventoryList);
+    } catch (error) {
+      console.error('Error updating inventory:', error);
+    }
+  };
 
+  // Search for an item in the inventory
+  const searchInventory = async (item) => {
+    try {
+      const docRef = doc(collection(firestore, 'pantry'), item);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        return docSnap.data();
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error('Error searching inventory:', error);
+    }
+  };
+
+  // Handle search action
+  const handleSearch = async () => {
+    setError('');
+    setSearchResult(null);
+
+    if (searchTerm.trim() === '') {
+      setError('Please enter an item to search.');
+      return;
+    }
+
+    try {
+      const itemData = await searchInventory(searchTerm);
+
+      if (itemData) {
+        setSearchResult(itemData);
+      } else {
+        setSearchResult(null);
+        setError('Item not found.');
+      }
+    } catch (error) {
+      setError('Error searching inventory.');
+    }
+  };
+
+  // Remove an item from the inventory
   const removeItem = async (item) => {
-    const docRef = doc(collection(firestore, 'pantry'), item)
-    const docSnap = await getDoc(docRef)
+    try {
+      const docRef = doc(collection(firestore, 'pantry'), item);
+      const docSnap = await getDoc(docRef);
 
-    if(docSnap.exists()){
-      const {quantity} = docSnap.data()
-      if (quantity === 1){
-        await deleteDoc(docRef)
+      if (docSnap.exists()) {
+        const { quantity } = docSnap.data();
+        if (quantity === 1) {
+          await deleteDoc(docRef);
+        } else {
+          await setDoc(docRef, { quantity: quantity - 1 });
+        }
+        await updateInventory();
       }
-      else {
-        await setDoc(docRef, {quantity: quantity - 1})
-      }
+    } catch (error) {
+      console.error('Error removing item:', error);
     }
+  };
 
-    await updateInventory()
-  }
-
+  // Add an item to the inventory
   const addItem = async (item) => {
-    const docRef = doc(collection(firestore, 'pantry'), item)
-    const docSnap = await getDoc(docRef)
+    try {
+      const docRef = doc(collection(firestore, 'pantry'), item);
+      const docSnap = await getDoc(docRef);
 
-    if(docSnap.exists()){ 
-      const {quantity} = docSnap.data()
-      await setDoc(docRef, {quantity: quantity + 1})
+      if (docSnap.exists()) {
+        const { quantity } = docSnap.data();
+        await setDoc(docRef, { quantity: quantity + 1 });
+      } else {
+        await setDoc(docRef, { quantity: 1 });
+      }
+      await updateInventory();
+    } catch (error) {
+      console.error('Error adding item:', error);
     }
-    else {
-      await setDoc(docRef, {quantity: 1})
-    }
+  };
 
-    await updateInventory()
-  }
-
+  // Fetch inventory on component mount
   useEffect(() => {
-    updateInventory()
-  }, [])
+    updateInventory();
+  }, []);
 
-  const handleOpen = () => setOpen(true)
-  const handleClose = () => setOpen(false) 
+  // Handle modal open and close
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
+  // Material-UI theme configuration
   const theme = createTheme({
     palette: {
       color: {
@@ -79,15 +136,16 @@ export default function Home() {
         dark: '#552910',
         redBrown: '#863a14',
         medium: '#9b5f39',
-        white: 'ffffff'
+        white: '#ffffff',
       },
     },
   });
 
-  const StyledButton = styled(Button)(({ theme, color = 'primary' }) => ({
-    ':hover': { 
+  // StyledButton component with custom styles
+  const StyledButton = styled(Button)(({ theme }) => ({
+    ':hover': {
       backgroundColor: '#863a14',
-      color: '#ffffff'
+      color: '#ffffff',
     },
   }));
 
@@ -188,8 +246,43 @@ export default function Home() {
             <Box width="100%" display="flex" flexDirection="column" alignItems="center" marginTop="50px" px={2}>
                 <Typography variant='h2' fontWeight={400} mb={2}>
                   Pantry Items
-                </Typography>
-                
+                </Typography> 
+                <Stack spacing={2} width="100%" maxWidth="600px" mb={2}>
+                <TextField
+                  variant="outlined"
+                  placeholder="Search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') handleSearch();
+                  }}
+                  fullWidth
+                />
+                <Button
+                  variant="contained"
+                  sx={{ bgcolor: 'color.dark', alignSelf: 'flex-end' }}
+                  onClick={handleSearch}
+                >
+                  Search
+                </Button>
+              </Stack>
+              {error && <Typography color="error">{error}</Typography>}
+              {searchResult && (
+                <Box
+                  width="100%"
+                  maxWidth="600px"
+                  p={2}
+                  borderRadius="10px"
+                  bgcolor="white"
+                  boxShadow={1}
+                  mb={2}
+                >
+                  <Typography variant="h5">
+                    {searchTerm}
+                  </Typography>
+                  <Typography variant="h6">Quantity: {searchResult?.quantity || 0}</Typography>
+                </Box>
+              )}
                 <Box
                   width="100%"
                   maxWidth="600px"
